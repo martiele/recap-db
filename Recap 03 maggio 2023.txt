@@ -25,3 +25,204 @@ Voto
 Testo
 Videogioco_ID
 
+
+
+1) Lista videogiochi
+
+SELECT `title`
+FROM `videogames`
+ORDER BY `release_date` DESC;
+
+
+2) Quanti videogiochi ci sono nel DB
+
+SELECT COUNT(*) as n_videogame
+FROM videogames
+
+
+3) Quanti videogiochi iniziano con una data stringa nel titolo ("the")
+
+SELECT COUNT(*)
+FROM videogames
+WHERE UPPER(title) LIKE 'the%'
+
+
+4) Quanti videogiochi per Software house ID
+
+SELECT software_house_ID, COUNT(*)
+FROM videogames
+GROUP BY software_house_ID
+
+
+
+4b) Cerca tutte le software house e il numero di videogiochi prodotti da ognuna
+
+SELECT software_houses.`name`, COUNT(videogames.id)as n_videog
+FROM software_houses LEFT JOIN videogames
+ON software_houses.id = videogames.software_house_ID
+GROUP BY software_houses.`id`
+
+
+5) Quanti videogiochi per Software house ID (usando gli alias)
+SELECT V.software_house_ID, COUNT(*) as num
+FROM videogames as V
+GROUP BY V.software_house_ID
+
+
+
+5a) Quanti videogiochi per Software house, con nome Software house
+
+SELECT software_houses.name, software_houses.address, COUNT(*) as num
+FROM videogames as V
+JOIN software_houses
+ON V.software_house_ID = software_houses.id
+GROUP BY software_houses.id
+
+
+6) Quanti videogiochi per Software house per anno, con nome Software house
+
+SELECT S.name, YEAR(V.release_date) as anno_rilascio, COUNT(*) as num
+FROM videogames as V
+JOIN software_houses as S
+ON V.software_house_ID = S.id
+GROUP BY S.id, anno_rilascio
+
+
+7) Quante recensioni per videogioco negli ultimi 20 anni, con videogioco ID
+
+SELECT videogame_ID, COUNT(*) as recensioni
+FROM reviews
+WHERE TIMESTAMPDIFF(YEAR, CURDATE(), date ) < 20
+#WHERE date > DATE_SUB(CURDATE(), INTERVAL 20 YEAR ) 
+#WHERE TIMESTAMPDIFF(YEAR, date, CURDATE() ) < 20
+GROUP BY videogame_ID
+
+
+
+8) Quali videogiochi hanno più di 30 recensioni, con videogioco ID
+negli ultimi 20 anni
+
+SELECT videogame_ID, COUNT(*) as recensioni
+FROM reviews
+WHERE TIMESTAMPDIFF(YEAR, CURDATE(), date ) < 20
+GROUP BY videogame_ID
+HAVING recensioni>30
+ORDER BY recensioni DESC
+
+
+8) Quanti videogiochi hanno più di 30 recensioni, con videogioco ID
+negli ultimi 20 anni
+
+SELECT videogame_ID, COUNT(*) as recensioni
+FROM reviews
+WHERE TIMESTAMPDIFF(YEAR, CURDATE(), date ) < 20
+GROUP BY videogame_ID
+HAVING recensioni>30
+ORDER BY recensioni DESC
+
+
+9) Ordiniamo i videogiochi per numero recensioni, con ID
+(ovviamente se un videogioco non ha recensioni, qua non esce, perchè stiamo interrogando solo la tabella reviews)
+SELECT videogame_ID, COUNT(*) as recensioni
+FROM reviews
+WHERE TIMESTAMPDIFF(YEAR, CURDATE(), date ) < 20
+GROUP BY videogame_ID
+HAVING recensioni>30
+ORDER BY recensioni DESC, videogame_ID ASC
+
+
+
+10) Ordiniamo i videogiochi per numero recensioni, con Titolo videogioco
+(facciamo attenzione che il count non vuole in questo caso la * ma reviews.id 
+perchè altrimenti conta come 1 il video gioco "Paper Mario" che invece non ha recensioni)
+
+SELECT V.title, COUNT(R.id) as recensioni
+FROM reviews AS R
+RIGHT JOIN videogames AS V
+ON V.id = R.videogame_ID
+GROUP BY V.title  
+ORDER BY `recensioni` ASC
+
+
+11) Ordiniamo i videogiochi per numero recensioni, con Titolo videogioco e nome Software house
+
+SELECT software_houses.name, V.title, COUNT(R.id) as recensioni
+FROM reviews AS R
+RIGHT JOIN videogames AS V ON V.id = R.videogame_ID
+JOIN software_houses ON software_houses.id = V.software_house_ID 
+GROUP BY software_houses.name, V.title
+ORDER BY `recensioni` DESC
+
+
+
+12) Voto medio di ogni software house, dato dalla media voto di ogni gioco
+SELECT SH.name, ROUND(AVG(R.vote),2) as media
+FROM software_houses as SH 
+JOIN videogames as V ON SH.id = V.software_house_ID
+JOIN reviews as R ON V.id = R.videogame_ID
+GROUP BY SH.name
+
+
+
+13) Cosa fa la seguente query?
+SELECT * 
+FROM `videogames`
+RIGHT JOIN `genres_videogames` ON `genres_videogames`.`videogame_ID` = `videogames`.`id`
+RIGHT JOIN `genres` ON `genres_videogames`.`genres_ID`= `genres`.`ID`
+
+"""Mostra tutti i generi ed i videogiochi che hanno almeno un genere specificato nella tabella pivot della relazione."""
+
+
+14) Prezzo medio dei giochi di ogni software house per il genere "Adventure"
+SELECT SH.name, ROUND(AVG(V.price), 2) as media
+FROM videogames as V
+JOIN software_houses as SH ON SH.id = V.software_house_ID
+JOIN genres_videogames as GV ON GV.videogame_ID = V.id
+JOIN genres as G ON GV.genres_ID = G.ID
+WHERE G.name = "Adventure"
+GROUP BY SH.name
+ORDER BY media ASC
+
+
+
+
+15) Quanti giochi sono stati pubblicati in ogni genere da ciascuna software house. 
+SELECT COUNT(V.id), G.name as genere, SH.name as SH_name
+FROM software_houses as SH 
+JOIN videogames as V ON SH.id = V.software_house_ID
+JOIN genres_videogames as GV ON GV.videogame_ID = V.id
+JOIN genres as G ON GV.genres_ID = G.ID
+GROUP BY SH_name, genere
+
+
+16) Come sopra ma voglio i risultati solo se hanno pubblicato più di un gioco per la stessa categoria.
+
+SELECT SH.name, ROUND(AVG(V.price), 2) as media
+FROM videogames as V
+JOIN software_houses as SH ON SH.id = V.software_house_ID
+JOIN genres_videogames as GV ON GV.videogame_ID = V.id
+JOIN genres as G ON GV.genres_ID = G.ID
+WHERE G.name = "Adventure"
+GROUP BY SH.name
+ORDER BY media ASC
+
+
+
+
+17) RICERCA PAROLA ESATTA
+
+SELECT * FROM `videogames` 
+WHERE `title` REGEXP '[[:<:]]the[[:>:]]'
+
+
+
+
+
+
+
+
+
+
+
+
+
