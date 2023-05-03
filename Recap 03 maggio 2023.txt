@@ -1,0 +1,27 @@
+Creazione DB per gestire videogiochi
+
+- Software house
+- Videogiochi
+- Recensioni
+
+[Software_houses]
+Nome
+Indirizzo
+Nazione [VARCHAR(2)]
+
+[Videogames]
+Titolo
+Descrizione
+Genere
+Data di uscita
+Prezzo
+Software_house_ID
+
+[Reviews]
+(Titolo)
+(Autore)
+Data
+Voto
+Testo
+Videogioco_ID
+
